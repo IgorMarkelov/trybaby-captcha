@@ -9,6 +9,23 @@
 const API_BASE = "https://earnings-apparent-obvious-temperatures.trycloudflare.com";
 const tg = window.Telegram?.WebApp;
 tg?.ready(); tg?.expand();
+
+const diagnostic = document.createElement('pre');
+diagnostic.style.cssText =
+  'font-size:12px;text-align:left;white-space:pre-wrap;';
+
+const params = new URLSearchParams(location.hash.slice(1));
+
+diagnostic.textContent = [
+  'Telegram SDK: ' + Boolean(window.Telegram?.WebApp),
+  'initData: ' + Boolean(window.Telegram?.WebApp?.initData),
+  'URL tgWebAppData: ' + Boolean(params.get('tgWebAppData')),
+  'Platform: ' + (window.Telegram?.WebApp?.platform || 'unknown'),
+  'Version: ' + (window.Telegram?.WebApp?.version || 'unknown')
+].join('\n');
+
+document.body.appendChild(diagnostic);
+
 const button = document.getElementById('confirm');
 const output = document.getElementById('result');
 button.addEventListener('click', async () => {
