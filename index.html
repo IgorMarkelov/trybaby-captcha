@@ -25,6 +25,7 @@
     html,
     body {
       width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -35,18 +36,15 @@
       text-rendering: optimizeLegibility;
     }
 
-    /*
-      Telegram уже показывает Mini App внутри собственной компактной шторки.
-      Поэтому здесь нет второй модалки и нет привязки к низу viewport.
-      Контент начинается сразу в верхней части доступной WebView.
-    */
     .content {
       width: 100%;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 24px;
-      padding: 24px 16px 40px;
+      padding: 0 16px 80px;
       background: var(--bg);
     }
 
@@ -78,8 +76,8 @@
 
     h1 {
       width: 100%;
-      font-size: 17px;
-      line-height: 22px;
+      font-size: 20px;
+      line-height: 25px;
       font-weight: 600;
       letter-spacing: -0.43px;
     }
@@ -97,7 +95,7 @@
       height: 48px;
       min-height: 48px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 100px;
       padding: 0 16px;
       appearance: none;
       background: var(--button-bg);
@@ -140,7 +138,7 @@
     @media (max-width: 359px) {
       .content {
         gap: 20px;
-        padding: 20px 12px 28px;
+        padding: 0 12px 64px;
       }
 
       .robot {
