@@ -1,44 +1,104 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Проверка TryBaby</title><script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>body{font:16px -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;max-width:420px;margin:70px auto;padding:20px;background:var(--tg-theme-bg-color,#fff);color:var(--tg-theme-text-color,#222)}button{background:#3488ed;color:white;border:0;border-radius:12px;padding:16px 26px;font-size:17px;cursor:pointer}button:disabled{opacity:.5}#result{margin-top:20px}</style></head>
-<body><h2>Короткая проверка на человечность</h2><p>Нажмите кнопку и начните общение в чате родителей</p>
-<button id="confirm">Я не робот</button><p id="result"></p>
-<script>
-// ВАЖНО: замените строку на адрес HTTPS-туннеля или постоянно размещённого API.
-const API_BASE = "https://played-originally-valves-museum.trycloudflare.com";
-const tg = window.Telegram?.WebApp;
-tg?.ready(); tg?.expand();
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Проверка TryBaby</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
+  <script src="./config.js"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font: 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 88px 24px 40px;
+      background: var(--tg-theme-bg-color, #fff);
+      color: var(--tg-theme-text-color, #111);
+    }
+    h1 { font-size: 30px; line-height: 1.08; margin: 0 0 22px; }
+    p { font-size: 18px; line-height: 1.35; }
+    button {
+      appearance: none; border: 0; border-radius: 14px; padding: 16px 28px;
+      font-size: 18px; cursor: pointer; color: #fff;
+      background: var(--tg-theme-button-color, #3488ed);
+      margin-top: 12px;
+    }
+    button:disabled { opacity: .55; cursor: default; }
+    #result { min-height: 48px; margin-top: 24px; }
+    #close { display: none; }
+    details { margin-top: 42px; text-align: left; opacity: .72; }
+    pre { font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body>
+  <h1>Короткая проверка на человечность</h1>
+  <p>Подтвердите проверку, чтобы Telegram одобрил заявку на вступление.</p>
+  <button id="confirm">Я не робот</button>
+  <p id="result"></p>
+  <button id="close">Закрыть</button>
 
-const diagnostic = document.createElement('pre');
-diagnostic.style.cssText =
-  'font-size:12px;text-align:left;white-space:pre-wrap;';
+  <details>
+    <summary>Диагностика</summary>
+    <pre id="diagnostic"></pre>
+  </details>
 
-const params = new URLSearchParams(location.hash.slice(1));
+  <script>
+    const tg = window.Telegram?.WebApp;
+    const API_BASE = window.TRYBABY_CONFIG?.API_BASE?.replace(/\/$/, "") || "";
+    const button = document.getElementById("confirm");
+    const closeButton = document.getElementById("close");
+    const output = document.getElementById("result");
+    const diagnostic = document.getElementById("diagnostic");
 
-diagnostic.textContent = [
-  'Telegram SDK: ' + Boolean(window.Telegram?.WebApp),
-  'initData: ' + Boolean(window.Telegram?.WebApp?.initData),
-  'URL tgWebAppData: ' + Boolean(params.get('tgWebAppData')),
-  'Platform: ' + (window.Telegram?.WebApp?.platform || 'unknown'),
-  'Version: ' + (window.Telegram?.WebApp?.version || 'unknown')
-].join('\n');
+    tg?.ready();
+    tg?.expand();
 
-document.body.appendChild(diagnostic);
+    const unsafe = tg?.initDataUnsafe || {};
+    diagnostic.textContent = [
+      "Telegram SDK: " + Boolean(tg),
+      "initData: " + Boolean(tg?.initData),
+      "join query: " + Boolean(unsafe.chat_join_request_query_id),
+      "chat id: " + (unsafe.chat?.id ?? "—"),
+      "platform: " + (tg?.platform || "unknown"),
+      "version: " + (tg?.version || "unknown"),
+      "API configured: " + Boolean(API_BASE)
+    ].join("\n");
 
-const button = document.getElementById('confirm');
-const output = document.getElementById('result');
-button.addEventListener('click', async () => {
-  if (!tg?.initData) {output.textContent = 'Откройте приложение из Telegram через ссылку бота'; return;}
-  button.disabled = true; output.textContent = 'Проверяем…';
-  try {
-    const r = await fetch(`${API_BASE}/verify`, {method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({init_data:tg.initData})});
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.detail || 'Неизвестная ошибка');
-    output.textContent = data.message;
-    tg?.HapticFeedback?.notificationOccurred('success');
-    // Не закрываем окно автоматически: человек должен успеть увидеть результат.
-  } catch (e) {output.textContent = `Ошибка: ${e.message}`; button.disabled = false;}
-});
-</script></body></html>
+    if (!tg?.initData || !unsafe.chat_join_request_query_id) {
+      button.disabled = true;
+      output.textContent = "Откройте эту проверку из заявки на вступление в группу, а не через профиль бота.";
+    } else if (!API_BASE || API_BASE.includes("REPLACE_ME")) {
+      button.disabled = true;
+      output.textContent = "API Mini App не настроен.";
+    }
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      output.textContent = "Проверяем…";
+      try {
+        const response = await fetch(`${API_BASE}/verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ init_data: tg.initData }),
+          cache: "no-store"
+        });
+        let data = {};
+        try { data = await response.json(); } catch (_) {}
+        if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
+
+        output.textContent = data.message || "Проверка пройдена.";
+        tg?.HapticFeedback?.notificationOccurred("success");
+        closeButton.style.display = "inline-block";
+      } catch (error) {
+        output.textContent = `Ошибка: ${error.message}`;
+        tg?.HapticFeedback?.notificationOccurred("error");
+        button.disabled = false;
+      }
+    });
+
+    closeButton.addEventListener("click", () => tg?.close());
+  </script>
+</body>
+</html>
