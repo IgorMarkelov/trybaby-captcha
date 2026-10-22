@@ -36,16 +36,26 @@
       text-rendering: optimizeLegibility;
     }
 
+    body {
+      position: relative;
+    }
+
     .content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      background: var(--bg);
+    }
+
+    .stack {
       width: 100%;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
-      gap: 24px;
-      padding: 0 16px 268px;
-      background: var(--bg);
+      transform: translateY(-54px);
     }
 
     .robot {
@@ -54,6 +64,7 @@
       height: 80px;
       flex: 0 0 80px;
       object-fit: contain;
+      margin-bottom: 48px;
       user-select: none;
       -webkit-user-drag: none;
     }
@@ -65,6 +76,7 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
+      margin-bottom: 40px;
       text-align: center;
       word-break: break-word;
     }
@@ -84,7 +96,6 @@
 
     .description {
       width: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
       font-size: 17px;
       line-height: 22px;
       font-weight: 400;
@@ -124,7 +135,7 @@
     .status {
       display: none;
       width: 100%;
-      margin-top: -12px;
+      margin-top: 12px;
       padding: 0 8px;
       text-align: center;
       font-size: 13px;
@@ -138,38 +149,45 @@
 
     @media (max-width: 359px) {
       .content {
-        gap: 20px;
-        padding: 0 12px 268px;
+        padding: 0 12px;
+      }
+
+      .stack {
+        transform: translateY(-44px);
       }
 
       .robot {
         width: 72px;
         height: 72px;
         flex-basis: 72px;
+        margin-bottom: 40px;
       }
 
       .copy {
         padding: 0 4px;
+        margin-bottom: 32px;
       }
     }
   </style>
 </head>
 <body>
   <main class="content" aria-label="Проверка на человечность">
-    <img
-      class="robot"
-      src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png"
-      alt=""
-      aria-hidden="true"
-    >
+    <div class="stack">
+      <img
+        class="robot"
+        src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png"
+        alt=""
+        aria-hidden="true"
+      >
 
-    <div class="copy">
-      <h1>Проверка на человечность</h1>
-      <p class="description">Нажмите на кнопку ниже, чтобы присоединиться к чату родителей</p>
+      <div class="copy">
+        <h1>Проверка на человечность</h1>
+        <p class="description">Нажмите на кнопку ниже, чтобы присоединиться к чату родителей</p>
+      </div>
+
+      <button class="action" id="confirm" type="button">Я не робот</button>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
     </div>
-
-    <button class="action" id="confirm" type="button">Я не робот</button>
-    <p class="status" id="status" role="status" aria-live="polite"></p>
   </main>
 
   <script>
