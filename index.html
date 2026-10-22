@@ -11,8 +11,7 @@
   <style>
     :root {
       color-scheme: light;
-      --page-bg: #f5f5f5;
-      --sheet-bg: #ffffff;
+      --bg: #ffffff;
       --text: #000000;
       --button-bg: #007aff;
       --button-text: #ffffff;
@@ -27,39 +26,28 @@
     body {
       width: 100%;
       margin: 0;
+      padding: 0;
       overflow: hidden;
-      background: var(--page-bg);
+      background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
 
-    html {
-      height: var(--app-height, 100dvh);
-    }
-
-    body {
-      height: var(--app-height, 100dvh);
-      min-height: 0;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .sheet {
+    /*
+      Telegram уже показывает Mini App внутри собственной компактной шторки.
+      Поэтому здесь нет второй модалки и нет привязки к низу viewport.
+      Контент начинается сразу в верхней части доступной WebView.
+    */
+    .content {
       width: 100%;
-      max-width: 430px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 24px;
-      padding:
-        24px
-        16px
-        max(40px, env(safe-area-inset-bottom));
-      background: var(--sheet-bg);
-      border-radius: 32px 32px 0 0;
+      padding: 24px 16px 40px;
+      background: var(--bg);
     }
 
     .robot {
@@ -114,7 +102,7 @@
       appearance: none;
       background: var(--button-bg);
       color: var(--button-text);
-      font: inherit;
+      font-family: inherit;
       font-size: 17px;
       line-height: 22px;
       font-weight: 600;
@@ -142,7 +130,6 @@
       text-align: center;
       font-size: 13px;
       line-height: 17px;
-      letter-spacing: -0.08px;
       color: var(--error);
     }
 
@@ -151,13 +138,9 @@
     }
 
     @media (max-width: 359px) {
-      .sheet {
+      .content {
         gap: 20px;
-        padding-top: 20px;
-        padding-left: 12px;
-        padding-right: 12px;
-        padding-bottom: max(28px, env(safe-area-inset-bottom));
-        border-radius: 28px 28px 0 0;
+        padding: 20px 12px 28px;
       }
 
       .robot {
@@ -173,7 +156,7 @@
   </style>
 </head>
 <body>
-  <main class="sheet" aria-label="Проверка на человечность">
+  <main class="content" aria-label="Проверка на человечность">
     <img
       class="robot"
       src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png"
@@ -197,24 +180,8 @@
     const status = document.getElementById("status");
 
     tg?.ready();
-    tg?.setBackgroundColor?.("#f5f5f5");
-    tg?.setHeaderColor?.("#f5f5f5");
-
-    // В compact-режиме Telegram высота Mini App меньше высоты экрана iPhone.
-    // 100vh / 100svh на iOS могут возвращать высоту полного WebView, из-за чего
-    // нижняя модалка оказывается за пределами видимой области. Берем реальную
-    // текущую высоту окна из Telegram WebApp API и обновляем ее при свайпе шторки.
-    function syncViewportHeight() {
-      const height = tg?.viewportHeight || window.visualViewport?.height || window.innerHeight;
-      if (height) {
-        document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
-      }
-    }
-
-    syncViewportHeight();
-    tg?.onEvent?.("viewportChanged", syncViewportHeight);
-    window.visualViewport?.addEventListener?.("resize", syncViewportHeight);
-    window.addEventListener("resize", syncViewportHeight);
+    tg?.setBackgroundColor?.("#ffffff");
+    tg?.setHeaderColor?.("#ffffff");
 
     const unsafe = tg?.initDataUnsafe || {};
 
@@ -237,7 +204,9 @@
     }
 
     button.addEventListener("click", async () => {
+      const originalLabel = button.textContent;
       button.disabled = true;
+      button.textContent = "Проверяем…";
       clearError();
       tg?.HapticFeedback?.impactOccurred?.("light");
 
@@ -260,14 +229,13 @@
 
         tg?.HapticFeedback?.notificationOccurred?.("success");
 
-        // Закрываем Mini App автоматически после успешного ответа API.
-        // Никакой дополнительной кнопки возврата пользователю не показываем.
         setTimeout(() => {
           tg?.close();
         }, 180);
       } catch (error) {
         tg?.HapticFeedback?.notificationOccurred?.("error");
         showError(`Ошибка: ${error.message}`);
+        button.textContent = originalLabel;
         button.disabled = false;
       }
     });
