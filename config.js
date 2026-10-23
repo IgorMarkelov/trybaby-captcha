@@ -1,5 +1,4 @@
-// This is the API address currently referenced by the deployed prototype.
-// Cloudflare quick-tunnel URLs are temporary: replace it after every tunnel restart.
+// Updated automatically by start-test.sh. Cloudflare Quick Tunnel URLs are temporary.
 window.TRYBABY_CONFIG = {
-  API_BASE: "https://universe-figure-west-colleague.trycloudflare.com"
+  API_BASE: "https://inspiration-honors-identifying-emily.trycloudflare.com"
 };
