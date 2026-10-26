@@ -6,7 +6,7 @@
   <title>Проверка TryBaby</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
-  <script src="./config.js?v=20261025153524"></script>
+  <script src="./config.js?v=20261026170352"></script>
 
   <style>
     :root {
@@ -212,12 +212,25 @@
       status.classList.remove("visible");
     }
 
+    function logClientEvent(eventName) {
+      if (!tg?.initData || !API_BASE || API_BASE.includes("REPLACE_ME")) return;
+      fetch(`${API_BASE}/event`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ init_data: tg.initData, event: eventName }),
+        cache: "no-store",
+        keepalive: true
+      }).catch(() => {});
+    }
+
     if (!tg?.initData || !unsafe.chat_join_request_query_id) {
       button.disabled = true;
       showError("Откройте проверку из заявки на вступление в группу");
     } else if (!API_BASE || API_BASE.includes("REPLACE_ME")) {
       button.disabled = true;
       showError("Проверка временно недоступна. Попробуйте позже");
+    } else {
+      logClientEvent("webapp_opened");
     }
 
     button.addEventListener("click", async () => {
@@ -226,6 +239,7 @@
       button.textContent = "Проверяем…";
       clearError();
       tg?.HapticFeedback?.impactOccurred?.("light");
+      logClientEvent("captcha_clicked");
 
       try {
         const response = await fetch(`${API_BASE}/verify`, {
