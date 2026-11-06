@@ -1,4 +1,4 @@
-// Updated automatically by start-prod.sh. Cloudflare Quick Tunnel URLs are temporary.
+// Updated automatically by restart_quick_tunnel.py. Quick Tunnel URLs are temporary.
 window.TRYBABY_CONFIG = {
-  API_BASE: "https://not-sold-draws-sponsored.trycloudflare.com"
+  API_BASE: "https://track-dome-width-loans.trycloudflare.com"
 };
